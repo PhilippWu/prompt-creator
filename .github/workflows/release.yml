@@ -1,0 +1,54 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created, prereleased]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller
+        shell: pwsh
+
+      - name: Build executable with PyInstaller
+        run: |
+          pyinstaller --onefile src/main.py --distpath dist --workpath build
+        shell: pwsh
+
+      - name: Prepare release archive
+        run: |
+          # Erstelle den Release-Ordner
+          New-Item -ItemType Directory -Force -Path release
+          # Kopiere die Executable und die benötigten Dateien
+          Copy-Item -Path 'dist\main.exe' -Destination 'release\main.exe' -Force
+          Copy-Item -Path 'resources\Config.json' -Destination 'release\Config.json' -Force
+          Copy-Item -Path 'resources\Exclude.json' -Destination 'release\Exclude.json' -Force
+          # Setze den ZIP-Dateinamen anhand des Release-Tags
+          $tag = "${{ github.event.release.tag_name }}"
+          $zipName = "prompt_creator_Release$tag.zip"
+          Compress-Archive -Path 'release\*' -DestinationPath "release\$zipName" -Force
+        shell: pwsh
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./release/prompt_creator_Release${{ github.event.release.tag_name }}.zip
+          asset_name: prompt_creator_${{ github.event.release.tag_name }}.zip
+          asset_content_type: application/zip

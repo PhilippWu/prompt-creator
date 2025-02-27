@@ -1,0 +1,31 @@
+{
+    "excludedDirectories": [
+        ".venv",
+        ".git",
+        ".copier",
+        ".prerun",
+        "node_modules",
+        ".vscode",
+        ".idea",
+        "dist",
+        "build",
+        "out",
+        ".pytest_cache",
+        ".mypy_cache",
+        "coverage",
+        ".mvn",
+        ".gradle",
+        "target",
+        ".vagrant",
+        ".terraform",
+        ".pnpm-store",
+        ".yarn",
+        "img"
+    ],
+    "excludedFiles": [
+        "appprompt.txt"
+    ],
+    "excludedPathPatterns": [
+        "frontend/public/assets/images"
+    ]
+}
